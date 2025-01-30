@@ -7,6 +7,7 @@ use App\Http\Resources\BlogPostResource;
 use App\Models\BlogPost;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class BlogPostController extends Controller
 {
@@ -92,6 +93,36 @@ class BlogPostController extends Controller
     }
 
     /**
+     * Display a listing of the latest post.
+     */
+    public function latest(Request $request)
+    {
+        $posts = Cache::remember('posts', 300, function () {
+            return BlogPost::whereDate('is_published', '<=', Carbon::today())->orderBy('created_at', 'desc')->take(20)->get();
+        });
+        return response()->json([
+            'message' => 'Founded items',
+            'data' => BlogPostResource::collection($posts)
+        ], 200);
+    }
+
+    /**
+     * Published posts total count
+     */
+    public function publishedPostsCount(Request $request)
+    {
+        $postsCount = Cache::remember('postsCount', 300, function () {
+            return BlogPost::whereDate('is_published', '<=', Carbon::today())->count();
+        });
+        return response()->json([
+            'message' => 'Published posts total count',
+            'data' => $postsCount
+        ], 200);
+    }
+
+
+
+    /**
      * Store a newly created resource in storage.
      *
      */
@@ -103,7 +134,7 @@ class BlogPostController extends Controller
             'is_draft' => 'required|boolean',
             'is_published' => 'required|boolean',
             'published_at' => 'required|date',
-            'user' => 'required|exists:users,id',// we can set user from $request->user()
+            'user' => 'required|exists:users,id', // we can set user from $request->user()
             'category' => 'required|exists:blog_categories,id',
         ]);
 

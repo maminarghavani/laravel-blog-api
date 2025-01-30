@@ -11,8 +11,11 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password-request', [AuthController::class, 'forgotPasswordRequest']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+
 // Posts
 Route::apiResource('posts', BlogPostController::class)->only(['index', 'show']);
+Route::get('/latest-published-posts', [BlogPostController::class, 'latest']);
+Route::get('/published-posts-count', [BlogPostController::class, 'publishedPostsCount']);
 // Categories
 Route::apiResource('categories', BlogCategoryController::class)->only(['index', 'show']);
 
